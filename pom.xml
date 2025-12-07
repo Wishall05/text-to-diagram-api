@@ -10,6 +10,7 @@
   <name>diagram-generator</name>
   <properties>
     <java.version>17</java.version>
+    <jackson.version>2.16.1</jackson.version>
     <spring.boot.version>3.1.4</spring.boot.version>
     <maven.compiler.source>17</maven.compiler.source>
     <maven.compiler.target>17</maven.compiler.target>
@@ -19,6 +20,21 @@
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-web</artifactId>
       <version>${spring.boot.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.amazonaws.serverless</groupId>
+      <artifactId>aws-serverless-java-container-springboot3</artifactId>
+      <version>2.0.1</version> </dependency>
+    <dependency>
+      <groupId>com.amazonaws</groupId>
+      <artifactId>aws-lambda-java-core</artifactId>
+      <version>1.2.2</version>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.fasterxml.jackson.core</groupId>
+      <artifactId>jackson-databind</artifactId>
+      <version>${jackson.version}</version>
     </dependency>
     <dependency>
       <groupId>com.squareup.okhttp3</groupId>
@@ -34,7 +50,7 @@
     <dependency>
       <groupId>com.fasterxml.jackson.core</groupId>
       <artifactId>jackson-databind</artifactId>
-      <version>2.15.2</version>
+      <version>${jackson.version}</version>
     </dependency>
     <dependency>
       <groupId>org.springframework.boot</groupId>
@@ -54,6 +70,55 @@
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-maven-plugin</artifactId>
         <version>${spring.boot.version}</version>
+        <configuration>
+          <skip>true</skip>
+        </configuration>
+        <executions>
+          <execution>
+            <id>repackage</id>
+            <goals>
+              <goal>repackage</goal>
+            </goals>
+            <phase>none</phase>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-shade-plugin</artifactId>
+        <version>3.5.1</version>
+        <configuration>
+          <finalName>diagram-generator-lambda</finalName>
+          <transformers>
+            <transformer implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
+              <resource>META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports</resource>
+            </transformer>
+          </transformers>
+        </configuration>
+        <executions>
+          <execution>
+            <phase>package</phase>
+            <goals>
+              <goal>shade</goal>
+            </goals>
+            <configuration>
+              <relocations>
+                <relocation>
+                  <pattern>com.fasterxml.jackson</pattern>
+                  <shadedPattern>shaded.com.fasterxml.jackson</shadedPattern>
+                </relocation>
+                <relocation>
+                  <pattern>com.fasterxml.jackson.core</pattern>
+                  <shadedPattern>shaded.com.fasterxml.jackson.core</shadedPattern>
+                </relocation>
+                <relocation>
+                  <pattern>com.fasterxml.jackson.databind</pattern>
+                  <shadedPattern>shaded.com.fasterxml.jackson.databind</shadedPattern>
+                </relocation>
+              </relocations>
+            </configuration>
+          </execution>
+        </executions>
       </plugin>
     </plugins>
   </build>

@@ -16,7 +16,9 @@ public class DiagramController {
         this.service = service;
     }
 
-    @PostMapping(value = "/generate", produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value = "/generate",
+            consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.ALL_VALUE},
+            produces = MediaType.APPLICATION_JSON_VALUE)
     public DiagramResponse generate(@RequestBody InputRequest request) {
         return service.generateDiagram(request.getText());
     }
